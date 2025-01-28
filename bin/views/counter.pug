@@ -1,0 +1,223 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        title Prod Counter
+        link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css")
+        script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js")
+        script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js')
+        style(type='text/css').
+            body{
+                padding: 0;
+                margin: 0;
+            }
+            html {
+                padding: 0;
+                margin: 0;
+            }
+            .main-container {
+                background-image: url('/tak_pennant_bg.jpg');
+                background-repeat: repeat;
+                background-position: center;
+                background-size: auto;
+                height: 100vh;
+                width: 100vw;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                position: relative;
+            }
+            .counter-container {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translateX(-50%) translateY(-50%);
+                text-align: center;
+                min-width: 25vw;
+                border: 3px solid black;
+                border-radius: 10px;
+                background-color: rgba(255, 255, 255, .7);
+                padding: 20px;
+            }
+            .counter-container h1 {
+                background-color: white;
+                color: black;
+                padding: 10px 13px;
+                font-size: 200pt;
+                border-radius: 10px;
+                border: 1px solid black;
+            }
+            .counter-button-container {
+                width: 100%;
+                text-align: center;
+            }
+            .counter-button {
+                width: 30%;
+                margin: 2rem;
+                font-size: 30pt;
+            }
+            .counter-button-top-container {
+                width: 100%;
+                text-align: center;
+            }
+            .counter-button-top {
+                width: 60%;
+                margin: .25rem;
+                font-size: 15pt;
+            }
+            .target {
+                color: black;
+            }
+            .archive {
+                color: white;
+            }
+            .archive:hover{
+                color: white;
+            }
+            .btn-form {
+                display: inline !important;
+            }
+
+        script.
+            function pollCounter() {
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', '/counter', true);
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState == 4 && xhr.status == 200) {
+                        document.getElementById('Counter').innerHTML = xhr.responseText;
+                    }
+                };
+                xhr.send();
+            };
+
+            var newTargetValue = null;
+
+            function handleNewTargetChange(value) {
+                newTargetValue = value;
+                console.log(newTargetValue)
+            };
+
+            $(document).ready(function(){
+                pollCounter()
+                //- polls every 30 seconds
+                setInterval(pollCounter, 30000);
+
+                //- Check for notifications
+                var notification = "!{notification}"
+                if(notification !== null) {
+                    const NotificationContainer = document.getElementById("NotificationContainer");
+                    if (notification == 'success') {
+                        NotificationContainer.style.height = "50px";
+                        NotificationContainer.style.width = "100vw";
+                        NotificationContainer.style.backgroundColor = "#03fca9";
+                        NotificationContainer.style.color = "white";
+                        NotificationContainer.style.position = "absolute";
+                        NotificationContainer.style.top = "0%";
+                        NotificationContainer.style.left = "0%";
+                        NotificationContainer.style.textAlign = "center";
+                        NotificationContainer.style.fontSize = "30px";
+                        NotificationContainer.style.zIndex = "10";
+                        NotificationContainer.innerHTML = "!{notificationMessage}"
+                    }
+                }
+
+                //- Remove notification after 3 seconds
+                setTimeout(() => {
+                    NotificationContainer.style.display = "none";
+                }, 3000)
+
+                const minusForm = document.getElementById("MinusForm");
+                minusForm.addEventListener('submit', (event, type) => {
+                    event.preventDefault(); 
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('GET', '/calc?type=minus', true);
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState == 4 && xhr.status == 200) {
+                            document.getElementById('Counter').innerHTML = xhr.responseText;
+                           }
+                        };
+                    xhr.send();
+                    console.log('Form submitted successfully!'); 
+                });
+
+                const plusForm = document.getElementById("PlusForm");
+                plusForm.addEventListener('submit', (event, type) => {
+                    event.preventDefault(); 
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('GET', '/calc?type=plus', true);
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState == 4 && xhr.status == 200) {
+                            document.getElementById('Counter').innerHTML = xhr.responseText;
+                           }
+                        };
+                    xhr.send();
+                    console.log('Form submitted successfully!'); 
+                });
+
+                const newTargetForm = document.getElementById("NewTargetForm");
+                newTargetForm.addEventListener('submit', (event, type) => {
+                    event.preventDefault(); 
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('GET', '/calc?type=new&target='+newTargetValue, true);
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState == 4 && xhr.status == 200) {
+                            document.getElementById('Counter').innerHTML = xhr.responseText;
+                           }
+                        };
+                    xhr.send();
+                    console.log('Form submitted successfully!'); 
+                    window.location.reload();
+                });
+
+                const archiveForm = document.getElementById("ArchiveForm");
+                archiveForm.addEventListener('submit', (event, type) => {
+                    event.preventDefault(); 
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('GET', '/calc?type=archive', true);
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState == 4 && xhr.status == 200) {
+                            document.getElementById('Counter').innerHTML = xhr.responseText;
+                           }
+                        };
+                    xhr.send();
+                    console.log('Form submitted successfully!'); 
+                    let url = window.location.href;
+                    let urlParamCheck = url.indexOf('?')
+                    if (urlParamCheck !== -1) {
+                        let urlParam = url.substring(0, urlParamCheck)
+                        window.location.href = urlParam + "?notification=archive%20success"
+                    } else {
+                        window.location.href = url + "?notification=archive%20success"
+                    }
+                });
+            });
+
+    body 
+        div(class="main-container")
+            div(id="NotificationContainer")
+            div(class="counter-container")
+                div(class="counter-button-top-container")
+                    form
+                        button(class="counter-button-top target btn btn-warning", type="button", data-bs-toggle="modal", data-bs-target="#NewTargetModal") New Target
+                    form(action="?type=archive", method="GET", class="btn-form" id="ArchiveForm")
+                        button(class="counter-button-top archive btn btn-info") Archive
+                h1(id="Counter")
+                div(class="counter-button-container")
+                    form(action="?type=minus", method="GET", class="btn-form" id="MinusForm")
+                        button(class="counter-button minus btn btn-danger") -
+                    form(action="?type=plus", method="GET", class="btn-form" id="PlusForm")
+                        button(class="counter-button plus btn btn-primary") +
+        
+        div(class="modal fade" id="NewTargetModal" tabindex="-1", aria-labelledby="NewTargetModalLabel", aria-hidden="true")
+            div(class="modal-dialog")
+                div(class="modal-content")
+                    div(class="modal-header")
+                        h1(class="modal-title fs-5", id="NewTargetModalLabel") New Target
+                    div(class="modal-body text-center")
+                        p Warning: This overwrites the current target. Make sure to save as an archive if you want to keep the current one.
+                        form(action="?type=new", method="GET", class="btn-form" id="NewTargetForm")
+                            input(type="number", onchange="handleNewTargetChange(this.value)")
+                            button(class="btn btn-warning" style="margin-left: 1rem;") Set Target 
+                    div(class="modal-footer")
+                        button(type="button", class="btn btn-secondary", data-bs-dismiss="modal") Close
