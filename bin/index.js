@@ -18,9 +18,11 @@ app.set('view engine', 'pug');
 const appRoute = require('./routes/appRoute');
 const counterUpdater = require('./routes/counterUpdater');
 const calc = require('./routes/calc');
+const viewRoute = require('./routes/viewRoute');
 
 app.use('/', appRoute);
 app.use('/counter', counterUpdater);
 app.use('/calc', calc);
+app.use('/view', viewRoute);
 
 module.exports = app;
